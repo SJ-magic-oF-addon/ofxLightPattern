@@ -1,0 +1,285 @@
+/************************************************************
+************************************************************/
+#include "ofxLightPattern.h"
+
+/************************************************************
+************************************************************/
+
+/******************************
+******************************/
+ofx_LIGHTPATTERN::ofx_LIGHTPATTERN()
+: Type(TYPE__CONST)
+, t_from_ms(0)
+, t_from_ms_org(0)
+, d_a(0)
+, d_b(0)
+, d_c(0)
+, d_d(0)
+, T(1000)
+, d_Transition_T(1000)
+, t_PerlinOffset_sec(0.12)
+, L0(0.0)
+, L1(1.0)
+{
+}
+
+/******************************
+******************************/
+void ofx_LIGHTPATTERN::setup(int now_ms, double _L0)
+{
+	Type = TYPE__CONST;
+	
+	L0 = _L0;
+	
+	t_from_ms = now_ms;
+}
+
+/******************************
+******************************/
+void ofx_LIGHTPATTERN::setup(int now_ms, double _L0, double _L1, int _T)
+{
+	Type = TYPE__PERLIN;
+	
+	L0 = _L0;
+	L1 = _L1;
+	T = _T;
+	
+	t_PerlinOffset_sec = ofRandom(0, 1000);
+	
+	t_from_ms = now_ms;	
+}
+
+/******************************
+******************************/
+void ofx_LIGHTPATTERN::setup(int now_ms, double _L0, double _L1, int _d_a, int _d_b)
+{
+	Type = TYPE__1WAY;
+	
+	L0 = _L0;
+	L1 = _L1;
+	
+	d_a = _d_a;
+	d_b = _d_b;
+	
+	t_from_ms = now_ms;
+}
+
+/******************************
+******************************/
+void ofx_LIGHTPATTERN::setup(int now_ms, double _L0, double _L1, int _d_a, int _d_b, int _d_c, int _d_d)
+{
+	Type = TYPE__1TIME;
+	
+	L0 = _L0;
+	L1 = _L1;
+	
+	d_a = _d_a;
+	d_b = _d_b;
+	d_c = _d_c;
+	d_d = _d_d;
+	
+	t_from_ms = now_ms;
+}
+
+/******************************
+******************************/
+void ofx_LIGHTPATTERN::setup(int now_ms, double _L0, double _L1, int _d_a, int _d_b, int _d_c, int _d_d, int _T)
+{
+	Type = TYPE__LOOP;
+	
+	L0 = _L0;
+	L1 = _L1;
+	
+	d_a = _d_a;
+	d_b = _d_b;
+	d_c = _d_c;
+	d_d = _d_d;
+	
+	T = _T;
+	
+	t_from_ms = now_ms;
+}
+
+/******************************
+******************************/
+void ofx_LIGHTPATTERN::setup(int now_ms, double _L0, double _L1, int _d_b, int _d_c, int _d_d, int _T_from_min, int _T_from_max, int _T_to_min, int _T_to_max, int _d_Transition_T)
+{
+	MIN_MAX_PAIR _T_from(_T_from_min, _T_from_max);
+	MIN_MAX_PAIR _T_to(_T_to_min, _T_to_max);
+	
+	setup(now_ms, _L0, _L1, _d_b, _d_c, _d_d, _T_from, _T_to, _d_Transition_T);
+	
+	/*
+	Type = TYPE__RAMDOM_TIMING_LOOP;
+	
+	L0 = _L0;
+	L1 = _L1;
+	
+	d_a = ofRandom(_T_from_min, _T_from_max);
+	d_b = _d_b;
+	d_c = _d_c;
+	d_d = _d_d;
+	
+	T = ofRandom(_T_from_min, _T_from_max);
+	T_from_min = _T_from_min;
+	T_from_max = _T_from_max;
+	T_to_min = _T_to_min;
+	T_to_max = _T_to_max;
+	
+	d_Transition_T = _d_Transition_T;
+	
+	t_from_ms = now_ms;
+	t_from_ms_org = now_ms;
+	*/
+}
+
+/******************************
+******************************/
+void ofx_LIGHTPATTERN::setup(int now_ms, double _L0, double _L1, int _d_b, int _d_c, int _d_d, const MIN_MAX_PAIR& _T_from, const MIN_MAX_PAIR& _T_to, int _d_Transition_T)
+{
+	Type = TYPE__RAMDOM_TIMING_LOOP;
+	
+	L0 = _L0;
+	L1 = _L1;
+	
+	d_a = ofRandom(_T_from.min_val, _T_from.max_val);
+	d_b = _d_b;
+	d_c = _d_c;
+	d_d = _d_d;
+	
+	T = ofRandom(_T_from.min_val, _T_from.max_val);
+	T_from = _T_from;
+	T_to = _T_to;
+	
+	d_Transition_T = _d_Transition_T;
+	
+	t_from_ms = now_ms;
+	t_from_ms_org = now_ms;
+}
+
+/******************************
+******************************/
+double ofx_LIGHTPATTERN::update(int now_ms)
+{
+	double ret = 0;
+	switch(Type){
+		case TYPE__CONST:
+			ret = update__Const(now_ms);
+			break;
+		case TYPE__PERLIN:
+			ret = update__Perlin(now_ms);
+			break;
+		case TYPE__1WAY:
+			ret = update__1way(now_ms);
+			break;
+		case TYPE__1TIME:
+		case TYPE__LOOP:
+		case TYPE__RAMDOM_TIMING_LOOP:
+			ret = update__Loop(now_ms);
+			break;
+	}
+	
+	return ret;
+}
+
+/******************************
+******************************/
+double ofx_LIGHTPATTERN::update__Const(int now_ms)
+{
+	return L0;
+}
+
+/******************************
+******************************/
+double ofx_LIGHTPATTERN::update__Perlin(int now_ms)
+{
+	/********************
+	********************/
+	double dt = (double(now_ms) - t_from_ms) / 1000; // secで計算. perlinはintでalways 0.5
+	if(dt < 0) return 0;
+	
+	/********************
+	********************/
+	double _T = double(T) / 1000; // secで計算.
+	return ofMap( ofNoise(double(dt)/_T +  t_PerlinOffset_sec), 0, 1, L0, L1, true );
+}
+
+/******************************
+******************************/
+double ofx_LIGHTPATTERN::update__1way(int now_ms)
+{
+	/********************
+	********************/
+	int dt = now_ms - t_from_ms;
+	if(dt < 0) return 0;
+	
+	/********************
+	********************/
+	if(dt < d_a){
+		return L0;
+		
+	}else if(dt < d_a + d_b){
+		if(d_b == 0) { printf("Error in %s:%d\n", __FILE__, __LINE__); std::exit(1); }	// d_b == 0 はokだが、その時は、ここに入ってこないはず.
+		
+		double tan = (L1 - L0) / d_b;
+		return tan * (dt - d_a) + L0;
+		
+	}else{
+		return L1;
+		
+	}
+}
+
+/******************************
+******************************/
+double ofx_LIGHTPATTERN::update__Loop(int now_ms)
+{
+	/********************
+	********************/
+	int dt = now_ms - t_from_ms;
+	if(dt < 0) return 0;
+	
+	/********************
+	********************/
+	if(T < dt){
+		if(Type == TYPE__1TIME){
+			// no Reset.
+		}else if(Type == TYPE__LOOP){
+			t_from_ms = now_ms - (dt - T);
+		}else if(Type == TYPE__RAMDOM_TIMING_LOOP){
+			t_from_ms = now_ms - (dt - T);
+			
+			double ratio = (double(now_ms) - t_from_ms_org) / d_Transition_T;
+			int T_min = (int)ofMap(ratio, 0.0, 1.0, T_from.min_val, T_to.min_val, true);
+			int T_max = (int)ofMap(ratio, 0.0, 1.0, T_from.max_val, T_to.max_val, true);
+			
+			T = ofRandom(T_min, T_max);
+		}
+	}
+	
+	/********************
+	********************/
+	if(dt < d_a){
+		return L0;
+		
+	}else if(dt < d_a + d_b){
+		if(d_b == 0) { printf("Error in %s:%d\n", __FILE__, __LINE__); std::exit(1); }	// d_b == 0 はokだが、その時は、ここに入ってこないはず.
+		
+		double tan = (L1 - L0) / d_b;
+		return tan * (dt - d_a) + L0;
+		
+	}else if(dt < d_a + d_b + d_c){
+		return L1;
+		
+	}else if(dt < d_a + d_b + d_c + d_d){
+		if(d_d == 0) { printf("Error in %s:%d\n", __FILE__, __LINE__); std::exit(1); }	// d_d == 0 はokだが、その時は、ここに入ってこないはず.
+		
+		double tan = (L0 - L1) / d_d;
+		return tan * (dt - (d_a + d_b + d_c)) + L1;
+		
+	}else{
+		return L0;
+		
+	}
+}
+
