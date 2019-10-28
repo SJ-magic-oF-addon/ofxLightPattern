@@ -24,7 +24,13 @@ public:
 		
 		MIN_MAX_PAIR(int _min, int _max)
 		: min_val(_min), max_val(_max)
-		{}
+		{
+			if(max_val < min_val){
+				int temp = min_val;
+				min_val = max_val;
+				max_val = temp;
+			}
+		}
 	};
 	
 private:
