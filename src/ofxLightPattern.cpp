@@ -83,7 +83,7 @@ void ofx_LIGHTPATTERN::setup(int now_ms, double _L0, double _L1, int _d_a, int _
 
 /******************************
 ******************************/
-void ofx_LIGHTPATTERN::setup(int now_ms, double _L0, double _L1, int _d_a, int _d_b, int _d_c, int _d_d, int _T)
+void ofx_LIGHTPATTERN::setup(int now_ms, double _L0, double _L1, int _d_a, int _d_b, int _d_c, int _d_d, int _T, bool _b_Keep_T)
 {
 	Type = TYPE__LOOP;
 	
@@ -96,6 +96,7 @@ void ofx_LIGHTPATTERN::setup(int now_ms, double _L0, double _L1, int _d_a, int _
 	d_d = _d_d;
 	
 	T = _T;
+	b_Keep_T = _b_Keep_T;
 	
 	t_from_ms = now_ms;
 }
@@ -108,29 +109,6 @@ void ofx_LIGHTPATTERN::setup(int now_ms, double _L0, double _L1, int _d_b, int _
 	MIN_MAX_PAIR _T_to(_T_to_min, _T_to_max);
 	
 	setup(now_ms, _L0, _L1, _d_b, _d_c, _d_d, _T_from, _T_to, _d_Transition_T);
-	
-	/*
-	Type = TYPE__RAMDOM_TIMING_LOOP;
-	
-	L0 = _L0;
-	L1 = _L1;
-	
-	d_a = ofRandom(_T_from_min, _T_from_max);
-	d_b = _d_b;
-	d_c = _d_c;
-	d_d = _d_d;
-	
-	T = ofRandom(_T_from_min, _T_from_max);
-	T_from_min = _T_from_min;
-	T_from_max = _T_from_max;
-	T_to_min = _T_to_min;
-	T_to_max = _T_to_max;
-	
-	d_Transition_T = _d_Transition_T;
-	
-	t_from_ms = now_ms;
-	t_from_ms_org = now_ms;
-	*/
 }
 
 /******************************
@@ -142,7 +120,8 @@ void ofx_LIGHTPATTERN::setup(int now_ms, double _L0, double _L1, int _d_b, int _
 	L0 = _L0;
 	L1 = _L1;
 	
-	d_a = ofRandom(_T_from.min_val, _T_from.max_val);
+	d_a = ofRandom(0, _T_from.max_val); // 先頭ずらす. 最初の t_from_ms 更新時、d_a = 0とする(update_Loop()).
+	// d_a = 0;
 	d_b = _d_b;
 	d_c = _d_c;
 	d_d = _d_d;
@@ -150,7 +129,8 @@ void ofx_LIGHTPATTERN::setup(int now_ms, double _L0, double _L1, int _d_b, int _
 	T = ofRandom(_T_from.min_val, _T_from.max_val);
 	T_from = _T_from;
 	T_to = _T_to;
-	
+	b_Keep_T = false;
+
 	d_Transition_T = _d_Transition_T;
 	
 	t_from_ms = now_ms;
@@ -245,10 +225,28 @@ double ofx_LIGHTPATTERN::update__Loop(int now_ms)
 		if(Type == TYPE__1TIME){
 			// no Reset.
 		}else if(Type == TYPE__LOOP){
-			t_from_ms = now_ms - (dt - T);
-		}else if(Type == TYPE__RAMDOM_TIMING_LOOP){
-			t_from_ms = now_ms - (dt - T);
+			/********************
+			Tを確実に守りたいなら b_Keep_T = true;
+			ただし、速いpatternでsamplingの関係からTop Levelが出ないことがある。
+			その時は、b_Keep_T = false; とする。
+			********************/			
+			if(b_Keep_T)	t_from_ms = now_ms - (dt - T);
+			else			t_from_ms = now_ms;
 			
+			dt = now_ms - t_from_ms;
+			
+		}else if(Type == TYPE__RAMDOM_TIMING_LOOP){
+			/* */
+			// t_from_ms = now_ms - (dt - T);
+			t_from_ms = now_ms; // そもそもRandomなので、Tにシビアである必要なし。Top Levelが出る方が大事。
+			
+			dt = now_ms - t_from_ms;
+			
+			// 2回目以降は、Tの揺れ のみで.
+			// せっかく t_from_ms = now_ms; としても、d_a != 0 だとstart 時間がズレ、samplingの関係でTop Levelが出ないことがあるので(速いStrobeなど)
+			d_a = 0;
+			
+			/* */
 			double ratio = (double(now_ms) - t_from_ms_org) / d_Transition_T;
 			int T_min = (int)ofMap(ratio, 0.0, 1.0, T_from.min_val, T_to.min_val, true);
 			int T_max = (int)ofMap(ratio, 0.0, 1.0, T_from.max_val, T_to.max_val, true);

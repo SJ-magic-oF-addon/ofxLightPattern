@@ -50,12 +50,13 @@ void ofApp::setup(){
 		fprintf(fp, "ch_%d,", i);
 		
 		// ofx_SET_LIGHTPATTERN::setup__Loop_OnOff(&LightPattern[i], now, 0, 1.0, 1000, NUM_LEDS, i);
-		ofx_SET_LIGHTPATTERN::setup__1way_OnOff(&LightPattern[i], now, 1.0, 0.0, 2000, NUM_LEDS, i);
+		// ofx_SET_LIGHTPATTERN::setup__Loop_OnOff(&LightPattern[i], now, 1.0, 0.0, 1000, NUM_LEDS, i);
+		// ofx_SET_LIGHTPATTERN::setup__1way_OnOff(&LightPattern[i], now, 1.0, 0.0, 2000, NUM_LEDS, i);
 		// ofx_SET_LIGHTPATTERN::setup__Loop_Flash(&LightPattern[i], now, 0, 1.0, 1000, NUM_LEDS, i);
 		// ofx_SET_LIGHTPATTERN::setup__Perlin(&LightPattern[i], now, 0, 1.0, 3000);
 		// ofx_SET_LIGHTPATTERN::setup__Fade(&LightPattern[i], now, 0.2, 0.5, 1000, 2000);
 	
-		// setup__RandomStrobe_Fall(&LightPattern[i], now, 0, 1.0);
+		setup__RandomStrobe_Fall(&LightPattern[i], now, 0, 1.0);
 	}
 	fprintf(fp, "\n");
 }
@@ -67,7 +68,7 @@ void ofApp::setup__RandomStrobe_Fall(ofx_LIGHTPATTERN* LightPattern, int now_ms,
 	/********************
 	********************/
 	int d_d_ms = 60; // 1 strobeの鋭さ
-	int d_Transition_T_ms = 5000; // 遷移時間
+	int d_Transition_T_ms = 10000; // 遷移時間
 	
 	/*
 	どの時間を見てもX個のLedが光っている(実際はRange内でRandom selectなので、期待値)

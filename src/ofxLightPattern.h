@@ -49,6 +49,7 @@ private:
 	
 	int d_a, d_b, d_c, d_d;
 	
+	bool b_Keep_T = true;
 	int T;
 	MIN_MAX_PAIR T_from, T_to;
 	int d_Transition_T;
@@ -70,7 +71,7 @@ public:
 	void setup(int now_ms, double _L0, double _L1, int _T);
 	void setup(int now_ms, double _L0, double _L1, int _d_a, int _d_b);
 	void setup(int now_ms, double _L0, double _L1, int _d_a, int _d_b, int _d_c, int _d_d);
-	void setup(int now_ms, double _L0, double _L1, int _d_a, int _d_b, int _d_c, int _d_d, int _T);
+	void setup(int now_ms, double _L0, double _L1, int _d_a, int _d_b, int _d_c, int _d_d, int _T, bool _b_Keep_T = true);
 	void setup(int now_ms, double _L0, double _L1, int _d_b, int _d_c, int _d_d, int _T_from_min, int _T_from_max, int _T_to_min, int _T_to_max, int d_Transition_T);
 	void setup(int now_ms, double _L0, double _L1, int _d_b, int _d_c, int _d_d, const MIN_MAX_PAIR& _T_from, const MIN_MAX_PAIR& _T_to, int _d_Transition_T);
 	
