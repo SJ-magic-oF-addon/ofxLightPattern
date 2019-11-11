@@ -18,7 +18,9 @@ private:
 public:
 	static void setup__Loop_OnOff(ofx_LIGHTPATTERN* LightPattern, int now_ms, double L0, double L1, int T, int NumChs, int ChId);
 	static void setup__1way_OnOff(ofx_LIGHTPATTERN* LightPattern, int now_ms, double L0, double L1, int T, int NumChs, int ChId);
+	static void setup__1Time_Flash(ofx_LIGHTPATTERN* LightPattern, int now_ms, double L0, double L1, int d_d);
 	static void setup__Loop_Flash(ofx_LIGHTPATTERN* LightPattern, int now_ms, double L0, double L1, int T, int NumChs, int ChId);
+	static void setup__Loop_Sin(ofx_LIGHTPATTERN* LightPattern, int now_ms, double L0, double L1, int T, int NumChs, int ChId);
 	static void setup__Perlin(ofx_LIGHTPATTERN* LightPattern, int now_ms, double L0, double L1, int T);
 	static void setup__Fade(ofx_LIGHTPATTERN* LightPattern, int now_ms, double L0, double L1, int d_a, int d_b);
 };

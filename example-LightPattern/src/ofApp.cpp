@@ -55,8 +55,9 @@ void ofApp::setup(){
 		// ofx_SET_LIGHTPATTERN::setup__Loop_Flash(&LightPattern[i], now, 0, 1.0, 1000, NUM_LEDS, i);
 		// ofx_SET_LIGHTPATTERN::setup__Perlin(&LightPattern[i], now, 0, 1.0, 3000);
 		// ofx_SET_LIGHTPATTERN::setup__Fade(&LightPattern[i], now, 0.2, 0.5, 1000, 2000);
+		ofx_SET_LIGHTPATTERN::setup__Loop_Sin(&LightPattern[i], now, 0.1, 0.8, 1000, NUM_LEDS, i);
 	
-		setup__RandomStrobe_Fall(&LightPattern[i], now, 0, 1.0);
+		// setup__RandomStrobe_Fall(&LightPattern[i], now, 0, 1.0);
 	}
 	fprintf(fp, "\n");
 }
@@ -80,8 +81,10 @@ void ofApp::setup__RandomStrobe_Fall(ofx_LIGHTPATTERN* LightPattern, int now_ms,
 	0.5個(疎)なら
 		T = d_d_ms * NUM_LEDS / 0.5;
 	*/
+	// ofx_LIGHTPATTERN::MIN_MAX_PAIR T_from( d_d_ms * NUM_LEDS/(max(NUM_LEDS/10, 1)), d_d_ms * NUM_LEDS/(max(NUM_LEDS/12, 1)) );
+	// ofx_LIGHTPATTERN::MIN_MAX_PAIR T_to( d_d_ms * NUM_LEDS/(max(NUM_LEDS/2, 1)), d_d_ms * NUM_LEDS/(max(NUM_LEDS/5, 1)) );
 	ofx_LIGHTPATTERN::MIN_MAX_PAIR T_from(d_d_ms * NUM_LEDS/NUM_LEDS, d_d_ms * NUM_LEDS/1);
-	ofx_LIGHTPATTERN::MIN_MAX_PAIR T_to(d_d_ms * (NUM_LEDS/0.3), d_d_ms * (NUM_LEDS/0.1));
+	ofx_LIGHTPATTERN::MIN_MAX_PAIR T_to(d_d_ms * (NUM_LEDS/0.1), d_d_ms * (NUM_LEDS/0.3));
 	
 	/* */
 	LightPattern->setup(now_ms, L0, L1, 0, 0, d_d_ms, T_from, T_to, d_Transition_T_ms);

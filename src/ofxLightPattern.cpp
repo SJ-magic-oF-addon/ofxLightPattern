@@ -120,18 +120,35 @@ void ofx_LIGHTPATTERN::setup(int now_ms, double _L0, double _L1, int _d_b, int _
 	L0 = _L0;
 	L1 = _L1;
 	
-	d_a = ofRandom(0, _T_from.max_val); // 先頭ずらす. 最初の t_from_ms 更新時、d_a = 0とする(update_Loop()).
+	d_a = ofRandom(0, _T_from.get_max()); // 先頭ずらす. 最初の t_from_ms 更新時、d_a = 0とする(update_Loop()).
 	// d_a = 0;
 	d_b = _d_b;
 	d_c = _d_c;
 	d_d = _d_d;
 	
-	T = ofRandom(_T_from.min_val, _T_from.max_val);
+	T = ofRandom(_T_from.get_min(), _T_from.get_max());
 	T_from = _T_from;
 	T_to = _T_to;
 	b_Keep_T = false;
 
 	d_Transition_T = _d_Transition_T;
+	
+	t_from_ms = now_ms;
+	t_from_ms_org = now_ms;
+}
+
+/******************************
+******************************/
+void ofx_LIGHTPATTERN::setup__Loop_Sin(int now_ms, double _L0, double _L1, int _T, double phase_deg)
+{
+	Type = TYPE__LOOP_SIN;
+	
+	L0 = _L0;
+	L1 = _L1;
+	
+	T = _T;
+	
+	t_phase = int(T/360.0 * phase_deg);
 	
 	t_from_ms = now_ms;
 	t_from_ms_org = now_ms;
@@ -156,6 +173,9 @@ double ofx_LIGHTPATTERN::update(int now_ms)
 		case TYPE__LOOP:
 		case TYPE__RAMDOM_TIMING_LOOP:
 			ret = update__Loop(now_ms);
+			break;
+		case TYPE__LOOP_SIN:
+			ret = update__Loop_Sin(now_ms);
 			break;
 	}
 	
@@ -248,8 +268,8 @@ double ofx_LIGHTPATTERN::update__Loop(int now_ms)
 			
 			/* */
 			double ratio = (double(now_ms) - t_from_ms_org) / d_Transition_T;
-			int T_min = (int)ofMap(ratio, 0.0, 1.0, T_from.min_val, T_to.min_val, true);
-			int T_max = (int)ofMap(ratio, 0.0, 1.0, T_from.max_val, T_to.max_val, true);
+			int T_min = (int)ofMap(ratio, 0.0, 1.0, T_from.get_min(), T_to.get_min(), true);
+			int T_max = (int)ofMap(ratio, 0.0, 1.0, T_from.get_max(), T_to.get_max(), true);
 			
 			T = ofRandom(T_min, T_max);
 		}
@@ -279,5 +299,24 @@ double ofx_LIGHTPATTERN::update__Loop(int now_ms)
 		return L0;
 		
 	}
+}
+
+/******************************
+******************************/
+double ofx_LIGHTPATTERN::update__Loop_Sin(int now_ms)
+{
+	/********************
+	********************/
+	int dt = now_ms - t_from_ms;
+	if(dt < 0) return 0;
+	
+	/********************
+	********************/
+	if(T < dt){
+		t_from_ms = now_ms - (dt - T);
+		dt = now_ms - t_from_ms;		
+	}
+	
+	return ofMap(sin(2 * PI * (dt - t_phase) / T), -1, 1, L0, L1);
 }
 

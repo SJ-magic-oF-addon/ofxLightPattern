@@ -47,6 +47,13 @@ void ofx_SET_LIGHTPATTERN::setup__1way_OnOff(ofx_LIGHTPATTERN* LightPattern, int
 
 /******************************
 ******************************/
+void ofx_SET_LIGHTPATTERN::setup__1Time_Flash(ofx_LIGHTPATTERN* LightPattern, int now_ms, double L0, double L1, int d_d)
+{
+	LightPattern->setup(now_ms, L0, L1, 0, 0, 0, d_d);
+}
+
+/******************************
+******************************/
 void ofx_SET_LIGHTPATTERN::setup__Loop_Flash(ofx_LIGHTPATTERN* LightPattern, int now_ms, double L0, double L1, int T, int NumChs, int ChId)
 {
 	correct_param(NumChs, ChId);
@@ -54,6 +61,17 @@ void ofx_SET_LIGHTPATTERN::setup__Loop_Flash(ofx_LIGHTPATTERN* LightPattern, int
 	int Sample_ms = T / (NumChs * 1);
 	
 	LightPattern->setup(now_ms, L0, L1, Sample_ms * ChId, 0, 0, Sample_ms, T);
+}
+
+/******************************
+******************************/
+void ofx_SET_LIGHTPATTERN::setup__Loop_Sin(ofx_LIGHTPATTERN* LightPattern, int now_ms, double L0, double L1, int T, int NumChs, int ChId)
+{
+	correct_param(NumChs, ChId);
+	
+	double phase_deg = 360 / NumChs * ChId;
+	
+	LightPattern->setup__Loop_Sin(now_ms, L0, L1, T, phase_deg);
 }
 
 /******************************
